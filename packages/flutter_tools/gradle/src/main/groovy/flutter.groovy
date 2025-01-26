@@ -8,6 +8,7 @@ import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
+import com.android.builder.model.BuildType
 import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.Deeplink
 import com.flutter.gradle.IntentFilterCheck
@@ -575,11 +576,9 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
-     * The BuildType DSL type is not public, and is therefore omitted from the signature.
-     *
      * @return "debug", "profile", or "release" (fall-back).
      */
-    private static String buildModeFor(buildType) {
+    private static String buildModeFor(BuildType buildType) {
         if (buildType.name == "profile") {
             return "profile"
         } else if (buildType.debuggable) {
@@ -594,7 +593,7 @@ class FlutterPlugin implements Plugin<Project> {
      *    1. The embedding
      *    2. libflutter.so
      */
-    void addFlutterDependencies(buildType) {
+    void addFlutterDependencies(BuildType buildType) {
         String flutterBuildMode = buildModeFor(buildType)
         if (!supportsBuildMode(flutterBuildMode)) {
             return
@@ -758,7 +757,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Closure addEmbeddingDependencyToPlugin = { buildType ->
+        Closure addEmbeddingDependencyToPlugin = { BuildType buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
@@ -1330,11 +1329,11 @@ class FlutterPlugin implements Plugin<Project> {
             TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
-                dependsOn compileTask
+                dependsOn(compileTask)
                 targetPlatforms.each { targetPlatform ->
                     String abi = PLATFORM_ARCH_MAP[targetPlatform]
                     from("${compileTask.intermediateDir}/${abi}") {
-                        include "*.so"
+                        include("*.so")
                         // Move `app.so` to `lib/<abi>/libapp.so`
                         rename { String filename ->
                             return "lib/${abi}/lib${filename}"
@@ -1345,7 +1344,7 @@ class FlutterPlugin implements Plugin<Project> {
                     String buildDir = "${getFlutterSourceDirectory()}/build"
                     String nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
                     from("${nativeAssetsDir}/${abi}") {
-                        include "*.so"
+                        include("*.so")
                         rename { String filename ->
                             return "lib/${abi}/${filename}"
                         }
