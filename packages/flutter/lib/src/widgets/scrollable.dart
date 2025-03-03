@@ -52,7 +52,8 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 
 /// Signature used by [TwoDimensionalScrollable] to build the viewport through
 /// which the scrollable content is displayed.
-typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition);
+typedef TwoDimensionalViewportBuilder = Widget Function(
+    BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition);
 
 // The return type of _performEnsureVisible.
 //
@@ -364,7 +365,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState? maybeOf(BuildContext context, { Axis? axis }) {
+  static ScrollableState? maybeOf(BuildContext context, {Axis? axis}) {
     // This is the context that will need to establish the dependency.
     final BuildContext originalContext = context;
     InheritedElement? element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
@@ -410,7 +411,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// * [Scrollable.maybeOf], which is similar to this method, but returns null
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState of(BuildContext context, { Axis? axis }) {
+  static ScrollableState of(BuildContext context, {Axis? axis}) {
     final ScrollableState? scrollableState = maybeOf(context, axis: axis);
     assert(() {
       if (scrollableState == null) {
@@ -428,10 +429,11 @@ class Scrollable extends StatefulWidget {
             'The context used was:\n'
             '  $context',
           ),
-          if (axis != null) ErrorHint(
-            'When specifying an axis, this method will only look for a Scrollable '
-            'that matches the given Axis.',
-          ),
+          if (axis != null)
+            ErrorHint(
+              'When specifying an axis, this method will only look for a Scrollable '
+              'that matches the given Axis.',
+            ),
         ]);
       }
       return true;
@@ -457,7 +459,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
-  static bool recommendDeferredLoadingForContext(BuildContext context, { Axis? axis }) {
+  static bool recommendDeferredLoadingForContext(BuildContext context, {Axis? axis}) {
     _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     while (widget != null) {
       if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
@@ -548,9 +550,9 @@ class _ScrollableScope extends InheritedWidget {
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
-class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, RestorationMixin
+class ScrollableState extends State<Scrollable>
+    with TickerProviderStateMixin, RestorationMixin
     implements ScrollContext {
-
   // GETTERS
 
   /// The manager for this [Scrollable] widget's viewport position.
@@ -572,9 +574,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   /// drag gesture reaches the edge of the [Viewport].
   Offset get deltaToScrollOrigin {
     return switch (axisDirection) {
-      AxisDirection.up    => Offset(0, -position.pixels),
-      AxisDirection.down  => Offset(0, position.pixels),
-      AxisDirection.left  => Offset(-position.pixels, 0),
+      AxisDirection.up => Offset(0, -position.pixels),
+      AxisDirection.down => Offset(0, position.pixels),
+      AxisDirection.left => Offset(-position.pixels, 0),
       AxisDirection.right => Offset(position.pixels, 0),
     };
   }
@@ -666,7 +668,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     if ((widget.scrollBehavior == null) != (oldWidget.scrollBehavior == null)) {
       return true;
     }
-    if (widget.scrollBehavior != null && oldWidget.scrollBehavior != null && widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
+    if (widget.scrollBehavior != null &&
+        oldWidget.scrollBehavior != null &&
+        widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
       return true;
     }
     ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
@@ -826,7 +830,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
+      final RenderIgnorePointer renderBox =
+          _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -906,18 +911,18 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains) &&
-      // Axes are only flipped for physical mouse wheel input.
-      // On some platforms, like web, trackpad input is handled through pointer
-      // signals, but should not be included in this axis modifying behavior.
-      // This is because on a trackpad, all directional axes are available to
-      // the user, while mouse scroll wheels typically are restricted to one
-      // axis.
-      event.kind == PointerDeviceKind.mouse;
+        // Axes are only flipped for physical mouse wheel input.
+        // On some platforms, like web, trackpad input is handled through pointer
+        // signals, but should not be included in this axis modifying behavior.
+        // This is because on a trackpad, all directional axes are available to
+        // the user, while mouse scroll wheels typically are restricted to one
+        // axis.
+        event.kind == PointerDeviceKind.mouse;
 
     final Axis axis = flipAxes ? flipAxis(widget.axis) : widget.axis;
     final double delta = switch (axis) {
       Axis.horizontal => event.scrollDelta.dx,
-      Axis.vertical   => event.scrollDelta.dy,
+      Axis.vertical => event.scrollDelta.dy,
     };
 
     return axisDirectionIsReversed(widget.axisDirection) ? -delta : delta;
@@ -928,7 +933,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
         // The handler won't use the `event`, so allow the platform to trigger
         // any default native actions.
-        event.respond(allowPlatformDefault: true);
+        event.respond(allowPlatformDefault: false);
         return;
       }
       final double delta = _pointerSignalEventDelta(event);
@@ -940,7 +945,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       }
       // The `event` won't result in a scroll, so allow the platform to trigger
       // any default native actions.
-      event.respond(allowPlatformDefault: true);
+      event.respond(allowPlatformDefault: false);
     } else if (event is PointerScrollInertiaCancelEvent) {
       position.pointerScroll(0);
       // Don't use the pointer signal resolver, all hit-tested scrollables should stop.
@@ -1017,15 +1022,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
     if (!widget.excludeFromSemantics) {
       result = NotificationListener<ScrollMetricsNotification>(
-        onNotification: _handleScrollMetricsNotification,
-        child: _ScrollSemantics(
-          key: _scrollSemanticsKey,
-          position: position,
-          allowImplicitScrolling: _physics!.allowImplicitScrolling,
-          semanticChildCount: widget.semanticChildCount,
-          child: result,
-        )
-      );
+          onNotification: _handleScrollMetricsNotification,
+          child: _ScrollSemantics(
+            key: _scrollSemanticsKey,
+            position: position,
+            allowImplicitScrolling: _physics!.allowImplicitScrolling,
+            semanticChildCount: widget.semanticChildCount,
+            child: result,
+          ));
     }
 
     result = _buildChrome(context, result);
@@ -1063,7 +1067,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       alignmentPolicy: alignmentPolicy,
       targetRenderObject: targetRenderObject,
     );
-    return (<Future<void>>[ ensureVisibleFuture ], this);
+    return (<Future<void>>[ensureVisibleFuture], this);
   }
 
   @override
@@ -1139,11 +1143,9 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 /// date with the scroll position when it sends the drag update event to a
 /// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _ScrollableSelectionContainerDelegate({
-    required this.state,
-    required ScrollPosition position
-  }) : _position = position,
-       _autoScroller = EdgeDraggingAutoScroller(state, velocityScalar: _kDefaultSelectToScrollVelocityScalar) {
+  _ScrollableSelectionContainerDelegate({required this.state, required ScrollPosition position})
+      : _position = position,
+        _autoScroller = EdgeDraggingAutoScroller(state, velocityScalar: _kDefaultSelectToScrollVelocityScalar) {
     _position.addListener(_scheduleLayoutChange);
   }
 
@@ -1297,7 +1299,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Matrix4 childTransform = selectables[currentSelectionStartIndex].getTransformTo(box);
       final Offset localDragStart = MatrixUtils.transformPoint(
         childTransform,
-        start.localPosition + Offset(0, - start.lineHeight / 2),
+        start.localPosition + Offset(0, -start.lineHeight / 2),
       );
       _currentDragStartRelatedToOrigin = MatrixUtils.transformPoint(transform, localDragStart + deltaToOrigin);
     }
@@ -1308,7 +1310,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Matrix4 childTransform = selectables[currentSelectionEndIndex].getTransformTo(box);
       final Offset localDragEnd = MatrixUtils.transformPoint(
         childTransform,
-        end.localPosition + Offset(0, - end.lineHeight / 2),
+        end.localPosition + Offset(0, -end.lineHeight / 2),
       );
       _currentDragEndRelatedToOrigin = MatrixUtils.transformPoint(transform, localDragEnd + deltaToOrigin);
     }
@@ -1451,7 +1453,8 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
-    return Rect.fromCenter(center: event.globalPosition, width: _kDefaultDragTargetSize, height: _kDefaultDragTargetSize);
+    return Rect.fromCenter(
+        center: event.globalPosition, width: _kDefaultDragTargetSize, height: _kDefaultDragTargetSize);
   }
 
   @override
@@ -1519,9 +1522,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
 Offset _getDeltaToScrollOrigin(ScrollableState scrollableState) {
   return switch (scrollableState.axisDirection) {
-    AxisDirection.up    => Offset(0, -scrollableState.position.pixels),
-    AxisDirection.down  => Offset(0, scrollableState.position.pixels),
-    AxisDirection.left  => Offset(-scrollableState.position.pixels, 0),
+    AxisDirection.up => Offset(0, -scrollableState.position.pixels),
+    AxisDirection.down => Offset(0, scrollableState.position.pixels),
+    AxisDirection.left => Offset(-scrollableState.position.pixels, 0),
     AxisDirection.right => Offset(scrollableState.position.pixels, 0),
   };
 }
@@ -1577,10 +1580,10 @@ class _RenderScrollSemantics extends RenderProxyBox {
     required bool allowImplicitScrolling,
     required int? semanticChildCount,
     RenderBox? child,
-  }) : _position = position,
-       _allowImplicitScrolling = allowImplicitScrolling,
-       _semanticChildCount = semanticChildCount,
-       super(child) {
+  })  : _position = position,
+        _allowImplicitScrolling = allowImplicitScrolling,
+        _semanticChildCount = semanticChildCount,
+        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
@@ -1624,11 +1627,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
     config.isSemanticBoundary = true;
     if (position.haveDimensions) {
       config
-          ..hasImplicitScrolling = allowImplicitScrolling
-          ..scrollPosition = _position.pixels
-          ..scrollExtentMax = _position.maxScrollExtent
-          ..scrollExtentMin = _position.minScrollExtent
-          ..scrollChildCount = semanticChildCount;
+        ..hasImplicitScrolling = allowImplicitScrolling
+        ..scrollPosition = _position.pixels
+        ..scrollExtentMax = _position.maxScrollExtent
+        ..scrollExtentMin = _position.minScrollExtent
+        ..scrollChildCount = semanticChildCount;
     }
   }
 
@@ -1844,7 +1847,8 @@ class TwoDimensionalScrollable extends StatefulWidget {
   /// * [TwoDimensionalScrollable.of], which is similar to this method, but
   ///   asserts if no [Scrollable] ancestor is found.
   static TwoDimensionalScrollableState? maybeOf(BuildContext context) {
-    final _TwoDimensionalScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_TwoDimensionalScrollableScope>();
+    final _TwoDimensionalScrollableScope? widget =
+        context.dependOnInheritedWidgetOfExactType<_TwoDimensionalScrollableScope>();
     return widget?.twoDimensionalScrollable;
   }
 
@@ -1877,10 +1881,8 @@ class TwoDimensionalScrollable extends StatefulWidget {
     assert(() {
       if (scrollableState == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary(
-            'TwoDimensionalScrollable.of() was called with a context that does '
-            'not contain a TwoDimensionalScrollable widget.\n'
-          ),
+          ErrorSummary('TwoDimensionalScrollable.of() was called with a context that does '
+              'not contain a TwoDimensionalScrollable widget.\n'),
           ErrorDescription(
             'No TwoDimensionalScrollable widget ancestor could be found starting '
             'from the context that was passed to TwoDimensionalScrollable.of(). '
@@ -1989,58 +1991,49 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
 
   @override
   Widget build(BuildContext context) {
-    assert(
-      axisDirectionToAxis(widget.verticalDetails.direction) == Axis.vertical,
-      'TwoDimensionalScrollable.verticalDetails are not Axis.vertical.'
-    );
-    assert(
-      axisDirectionToAxis(widget.horizontalDetails.direction) == Axis.horizontal,
-      'TwoDimensionalScrollable.horizontalDetails are not Axis.horizontal.'
-    );
+    assert(axisDirectionToAxis(widget.verticalDetails.direction) == Axis.vertical,
+        'TwoDimensionalScrollable.verticalDetails are not Axis.vertical.');
+    assert(axisDirectionToAxis(widget.horizontalDetails.direction) == Axis.horizontal,
+        'TwoDimensionalScrollable.horizontalDetails are not Axis.horizontal.');
 
     final Widget result = RestorationScope(
-      restorationId: widget.restorationId,
-      child: _VerticalOuterDimension(
-        key: _verticalOuterScrollableKey,
-        // For gesture forwarding
-        horizontalKey: _horizontalInnerScrollableKey,
-        axisDirection: widget.verticalDetails.direction,
-        controller: widget.verticalDetails.controller
-          ?? _verticalFallbackController!,
-        physics: widget.verticalDetails.physics,
-        clipBehavior: widget.verticalDetails.clipBehavior
-          ?? widget.verticalDetails.decorationClipBehavior
-          ?? Clip.hardEdge,
-        incrementCalculator: widget.incrementCalculator,
-        excludeFromSemantics: widget.excludeFromSemantics,
-        restorationId: 'OuterVerticalTwoDimensionalScrollable',
-        dragStartBehavior: widget.dragStartBehavior,
-        diagonalDragBehavior: widget.diagonalDragBehavior,
-        hitTestBehavior: widget.hitTestBehavior,
-        viewportBuilder: (BuildContext context, ViewportOffset verticalOffset) {
-          return _HorizontalInnerDimension(
-            key: _horizontalInnerScrollableKey,
-            verticalOuterKey: _verticalOuterScrollableKey,
-            axisDirection: widget.horizontalDetails.direction,
-            controller: widget.horizontalDetails.controller
-              ?? _horizontalFallbackController!,
-            physics: widget.horizontalDetails.physics,
-            clipBehavior: widget.horizontalDetails.clipBehavior
-              ?? widget.horizontalDetails.decorationClipBehavior
-              ?? Clip.hardEdge,
+        restorationId: widget.restorationId,
+        child: _VerticalOuterDimension(
+            key: _verticalOuterScrollableKey,
+            // For gesture forwarding
+            horizontalKey: _horizontalInnerScrollableKey,
+            axisDirection: widget.verticalDetails.direction,
+            controller: widget.verticalDetails.controller ?? _verticalFallbackController!,
+            physics: widget.verticalDetails.physics,
+            clipBehavior:
+                widget.verticalDetails.clipBehavior ?? widget.verticalDetails.decorationClipBehavior ?? Clip.hardEdge,
             incrementCalculator: widget.incrementCalculator,
             excludeFromSemantics: widget.excludeFromSemantics,
-            restorationId: 'InnerHorizontalTwoDimensionalScrollable',
+            restorationId: 'OuterVerticalTwoDimensionalScrollable',
             dragStartBehavior: widget.dragStartBehavior,
             diagonalDragBehavior: widget.diagonalDragBehavior,
             hitTestBehavior: widget.hitTestBehavior,
-            viewportBuilder: (BuildContext context, ViewportOffset horizontalOffset) {
-              return widget.viewportBuilder(context, verticalOffset, horizontalOffset);
-            },
-          );
-        }
-      )
-    );
+            viewportBuilder: (BuildContext context, ViewportOffset verticalOffset) {
+              return _HorizontalInnerDimension(
+                key: _horizontalInnerScrollableKey,
+                verticalOuterKey: _verticalOuterScrollableKey,
+                axisDirection: widget.horizontalDetails.direction,
+                controller: widget.horizontalDetails.controller ?? _horizontalFallbackController!,
+                physics: widget.horizontalDetails.physics,
+                clipBehavior: widget.horizontalDetails.clipBehavior ??
+                    widget.horizontalDetails.decorationClipBehavior ??
+                    Clip.hardEdge,
+                incrementCalculator: widget.incrementCalculator,
+                excludeFromSemantics: widget.excludeFromSemantics,
+                restorationId: 'InnerHorizontalTwoDimensionalScrollable',
+                dragStartBehavior: widget.dragStartBehavior,
+                diagonalDragBehavior: widget.diagonalDragBehavior,
+                hitTestBehavior: widget.hitTestBehavior,
+                viewportBuilder: (BuildContext context, ViewportOffset horizontalOffset) {
+                  return widget.viewportBuilder(context, verticalOffset, horizontalOffset);
+                },
+              );
+            }));
 
     // TODO(Piinks): Build scrollbars for 2 dimensions instead of 1,
     //  https://github.com/flutter/flutter/issues/122348
@@ -2118,11 +2111,10 @@ class _VerticalOuterDimensionState extends ScrollableState {
     RenderObject? targetRenderObject,
   }) {
     assert(
-      false,
-      'The _performEnsureVisible method was called for the vertical scrollable '
-      'of a TwoDimensionalScrollable. This should not happen as the horizontal '
-      'scrollable handles both axes.'
-    );
+        false,
+        'The _performEnsureVisible method was called for the vertical scrollable '
+        'of a TwoDimensionalScrollable. This should not happen as the horizontal '
+        'scrollable handles both axes.');
     return (<Future<void>>[], this);
   }
 
@@ -2177,7 +2169,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
             horizontalScrollable._handleDragStart(details);
             return;
           case Axis.vertical:
-            // Prepare to scroll vertically - will call super below after switch.
+          // Prepare to scroll vertically - will call super below after switch.
         }
     }
     super._handleDragStart(details);
@@ -2231,7 +2223,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
         horizontalScrollable._handleDragUpdate(horizontalDragDetails);
         return;
       case Axis.vertical:
-        // Scroll vertically - after switch
+      // Scroll vertically - after switch
     }
     super._handleDragUpdate(verticalDragDetails);
   }
